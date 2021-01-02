@@ -1,0 +1,9 @@
+TASK:
+  NAME: 'Titanic'
+  MODE: 'train'
+  GPUS: [0]
+
+DATA:
+  ROOT_DIR:   '../data'
+  TRAIN_PATH: 'titanic/train.csv'
+  TRAIN_BATCH:   256
