@@ -1,5 +1,6 @@
 import os
 import sys
+import shutil
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -9,29 +10,39 @@ from config import cfg, merge_cfg_from_file
 from LRScheduler.LRScheduler import BuildLRScheduler
 from data.DataLoader import MakeTrainLoader
 
+from log.logger import setup_logger, AverageMeter
 
-def TrainEpoch(epoch_idx, train_loader, model, loss_funcs, optimizer, lr_scheduler, device):
+
+def TrainEpoch(epoch_idx, train_loader, model, loss_funcs, optimizer, lr_scheduler, device, logger):
     model.train()
 
     for batch_idx, input_data in enumerate(train_loader):
         inputs, targets = input_data[0].to(device), input_data[1].to(device)
         logits = model(inputs)
 
-        loss_sum = 0
-        for idx in range(len(logits)):
-            loss = loss_funcs(logits, targets)
-            loss_sum += loss
+        loss = loss_funcs(logits, targets)
+        # loss_sum = 0
+        # for idx in range(len(logits)):
+        #     loss = loss_funcs(logits, targets)
+        #     loss_sum += loss
 
         optimizer.zero_grad()
-        loss_sum.backward()
+        loss.backward()
         optimizer.step()
-        lr_scheduler.step(epoch=epoch_idx - 1, batch=batch_idx + 1)
+        lr_scheduler.step()
+        logger.info('loss: %f, lr: %f' % (loss, lr_scheduler.get_lr()[0]))
 
 
 def TrainTest(cfg):
     os.environ['CUDA_DEVICES_ORDER'] = 'PCI_BUS_ID'
     os.environ['CUDA_VISIBLE_DEVICES'] = ','.join([str(item) for item in cfg.TASK.GPUS])
     device = torch.device('cuda' if len(cfg.TASK.GPUS) > 0 else 'cpu')
+
+    # init logger
+    output_dir = os.path.join(cfg.TASK.OUTPUT_ROOT_DIR, cfg.TASK.NAME)
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    logger = setup_logger(cfg.TASK.NAME, output_dir, distributed_rank=0)
 
     # data loader
     train_loader = MakeTrainLoader(os.path.join(cfg.DATA.ROOT_DIR, cfg.DATA.TRAIN_PATH), cfg.DATA.TRAIN_BATCH)
@@ -44,14 +55,15 @@ def TrainTest(cfg):
     loss_funcs = nn.CrossEntropyLoss().to(device)
     # optimizer
     params = [p for n, p in model.named_parameters()]
-    param_groups = [{'params': params, 'lr': 0.001}]
+    param_groups = [{'params': params, 'lr': 0.01}]
     optimizer = optim.SGD(param_groups, momentum=0.9, weight_decay=5e-4)
     # lr scheduler
-    lr_scheduler = BuildLRScheduler(optimizer, [5, 10], 0.1)
+    lr_scheduler = BuildLRScheduler(optimizer, [20, 50], 0.1)
 
     # start train
-    for epoch_idx in range(0, 20):
-        TrainEpoch(epoch_idx, train_loader,model, loss_funcs, optimizer, lr_scheduler, device)
+    for epoch_idx in range(0, cfg.SOLVER.EPOCHS):
+        logger.info('train epoch: {0}'.format(epoch_idx))
+        TrainEpoch(epoch_idx, train_loader, model, loss_funcs, optimizer, lr_scheduler, device, logger)
 
 
 def parse_args(args):

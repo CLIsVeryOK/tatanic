@@ -31,7 +31,8 @@ class Dataset(data.Dataset):
             data_np = np.array(data).astype('float32')
 
             label = input[['Survived']]
-            label_np = np.array(label).astype('int32')
+            label_np = np.array(label)[:, 0]
+
         else:
             raise NotImplemented
         return data_np, label_np

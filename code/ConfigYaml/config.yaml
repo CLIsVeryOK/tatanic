@@ -1,9 +1,14 @@
 TASK:
-  NAME: 'Titanic'
-  MODE: 'train'
-  GPUS: [0]
+  NAME:               'Titanic'
+  MODE:               'train'
+  GPUS:               [0]
+  OUTPUT_ROOT_DIR:    '../results'
 
 DATA:
-  ROOT_DIR:   '../data'
-  TRAIN_PATH: 'titanic/train.csv'
-  TRAIN_BATCH:   256
+  ROOT_DIR:           '../data'
+  TRAIN_PATH:         'titanic/train.csv'
+  TRAIN_BATCH:        256
+
+
+SOLVER:
+  EPOCHS:             60
