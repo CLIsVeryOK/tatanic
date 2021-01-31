@@ -8,7 +8,10 @@ DATA:
   ROOT_DIR:           '../data'
   TRAIN_PATH:         'titanic/train.csv'
   TRAIN_BATCH:        256
-
+  VAL_PATH:           'titanic/train.csv'
+  VAL_BATCH:          1
+  TEST_PATH:          'titanic/train.csv'
+  TEST_BATCH:         1
 
 SOLVER:
-  EPOCHS:             60
+  EPOCHS:             400

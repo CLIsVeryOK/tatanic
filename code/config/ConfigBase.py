@@ -16,6 +16,10 @@ _C.DATA = AttrDict()
 _C.DATA.ROOT_DIR = ''
 _C.DATA.TRAIN_PATH = ''
 _C.DATA.TRAIN_BATCH = 32
+_C.DATA.VAL_PATH = ''
+_C.DATA.VAL_BATCH = 1
+_C.DATA.TEST_PATH = ''
+_C.DATA.TEST_BATCH = 1
 
 # solver ----------------------
 _C.SOLVER = AttrDict()

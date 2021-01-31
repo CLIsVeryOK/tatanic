@@ -10,9 +10,13 @@ class Net(nn.Module):
         super(Net, self).__init__()
 
         # 第一层：fc1
-        self.fc1 = nn.Linear(11, 6)
+        self.fc1 = nn.Linear(8, 16)
         # 第二层：fc2
-        self.fc2 = nn.Linear(6, 2)
+        self.fc2 = nn.Linear(16, 32)
+        # 第三层：fc3
+        self.fc3 = nn.Linear(32, 16)
+        # 第四层：fc4
+        self.fc4 = nn.Linear(16, 2)
 
     # 定义神经网络数据流向:
     def forward(self, x):
@@ -20,6 +24,12 @@ class Net(nn.Module):
         x = F.relu(x)
 
         x = self.fc2(x)
+        x = F.relu(x)
+
+        x = self.fc3(x)
+        x = F.relu(x)
+
+        x = self.fc4(x)
         x = F.sigmoid(x)
 
         return x
